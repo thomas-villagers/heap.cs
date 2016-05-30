@@ -58,9 +58,7 @@ An array based implementation of a heap.
         if (list.Count == 0) throw new ArgumentOutOfRangeException("Cannot remove Element from empty Heap"); 
         T value = list[0];
         list[0] = list[list.Count-1];
-        list.RemoveAt(list.Count-1);  /* Removal of the last element in a List<T> is O(1) 
-                                         (see http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646), 
-                                         O(n) otherwise. */
+        list.RemoveAt(list.Count-1); 
         int index = 0;                    
         while(index < list.Count) {
     
@@ -89,6 +87,8 @@ An array based implementation of a heap.
         list[i2] = temp; 
       }
     }
+
+Note:  Removal of the last element in a List<T> is O(1) (see <http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646>), O(n) otherwise. 
 
 # Demo<a id="orgheadline5"></a>
 
@@ -196,7 +196,7 @@ Sort a Million numbers
 
     Generating 1000000 random elements...
     Sorting 1000000 random elements...
-    Insertion: 61 Removal: 794 Combined: 855
+    Insertion: 75 Removal: 781 Combined: 856
 
 Note:  Insertion is very fast while Removal is kind of slow. 
 
