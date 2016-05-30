@@ -21,9 +21,6 @@
 
 An array based implementation of a heap.
 
--   **Insertion:** O(log n)
--   **Removal:** O(log n)
-
     using System;
     using System.Collections.Generic; 
     
@@ -87,6 +84,9 @@ An array based implementation of a heap.
         list[i2] = temp; 
       }
     }
+
+-   **Insertion:** O(log n)
+-   **Removal:** O(log n)
 
 Note:  Removal of the last element in a List<T> is O(1) (see <http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646>), O(n) otherwise. 
 
@@ -196,7 +196,7 @@ Sort a Million numbers
 
     Generating 1000000 random elements...
     Sorting 1000000 random elements...
-    Insertion: 75 Removal: 781 Combined: 856
+    Insertion: 91 Removal: 808 Combined: 899
 
 Note:  Insertion is very fast while Removal is kind of slow. 
 

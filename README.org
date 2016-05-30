@@ -4,9 +4,6 @@
 
 An array based implementation of a heap.
 
-- Insertion :: O(log n)
-- Removal :: O(log n)
-
 #+BEGIN_SRC csharp :tangle src/heap.cs 
   using System;
   using System.Collections.Generic; 
@@ -72,6 +69,9 @@ An array based implementation of a heap.
     }
   }
 #+END_SRC
+
+- Insertion :: O(log n)
+- Removal :: O(log n)
 
 Note:  Removal of the last element in a List<T> is O(1) (see http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646), O(n) otherwise. 
 
