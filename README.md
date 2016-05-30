@@ -10,8 +10,19 @@
 <li><a href="#orgheadline4">2.3. Heap Sort Performance</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline6">3. Graphviz Output</a></li>
-<li><a href="#orgheadline7">4. Application: Task Schedule</a></li>
+<li><a href="#orgheadline8">3. Graphviz Output</a>
+<ul>
+<li><a href="#orgheadline6">3.1. Extensions</a></li>
+<li><a href="#orgheadline7">3.2. Example</a></li>
+</ul>
+</li>
+<li><a href="#orgheadline12">4. Application: Task Scheduling</a>
+<ul>
+<li><a href="#orgheadline9">4.1. Helper Classes</a></li>
+<li><a href="#orgheadline10">4.2. Example</a></li>
+<li><a href="#orgheadline11">4.3. A more complex example</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -196,13 +207,15 @@ Sort a Million numbers
 
     Generating 1000000 random elements...
     Sorting 1000000 random elements...
-    Insertion: 65 Removal: 769 Combined: 834
+    Insertion: 61 Removal: 765 Combined: 826
 
 Note:  Insertion is very fast while Removal is kind of slow. 
 
 Both operations run in O(log n) time, but Insertion is way more fast. Tests show that in practice Up Bubbling rarely exceeds a few levels, while Down Bubbling almost *always* needs to process the whole tree height. 
 
-# Graphviz Output<a id="orgheadline6"></a>
+# Graphviz Output<a id="orgheadline8"></a>
+
+## Extensions<a id="orgheadline6"></a>
 
     using System;
     
@@ -246,6 +259,8 @@ Both operations run in O(log n) time, but Insertion is way more fast. Tests show
       }
     }
 
+## Example<a id="orgheadline7"></a>
+
 Call extension method `PrintDot` and feed the results into [Graphviz](http://www.graphviz.org/): 
 
     class HeapTree {
@@ -269,7 +284,9 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
 
 ![img](images/heap.png)
 
-# Application: Task Schedule<a id="orgheadline7"></a>
+# Application: Task Scheduling<a id="orgheadline12"></a>
+
+## Helper Classes<a id="orgheadline9"></a>
 
     using System;
     using System.Collections.Generic; 
@@ -340,7 +357,7 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
         for (int i = 0; i < machines.Count; i++) 
           Console.WriteLine("    \\draw(-0.4, {0}) node[left]{{Machine {1}}} -- ++ (0.4,0);", i+1+0.5, i+1); 
     
-        Console.WriteLine("  \\draw[thick,->](-0.2,0.8) -- ++({0},0);", maxTime+1); 
+        Console.WriteLine("  \\draw[thick,->](-0.2,0.8) -- ++({0},0) node[right]{{time}};", maxTime+1); 
         for (int i = 0; i < maxTime; i++) 
           Console.WriteLine("    \\draw({0}, 0.6) node[below]{{{1}}} -- ++ (0,0.4);", i+1, i+1); 
     
@@ -348,6 +365,8 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
       }
     
     }
+
+## Example<a id="orgheadline10"></a>
 
     using System;
     using System.Collections.Generic; 
@@ -378,7 +397,7 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
 
 ![img](images/schedule.png)
 
-Another example: 
+## A more complex example<a id="orgheadline11"></a>
 
     using System;
     using System.Collections.Generic; 
@@ -394,7 +413,7 @@ Another example:
     
         var random = new Random(); 
         var tasks = new Heap<Task>((x,y) => x.Key - y.Key); 
-        Func<int, int, Task> MakeTask = ((t1,t2) => {int x = random.Next(t1)+1; return new Task(x, x+random.Next(t2)+1);});
+        Func<int, int, Task> MakeTask = ((t1,t2) => {int x = random.Next(1,t1+1); return new Task(x, x+random.Next(1,t2+1));});
     
         for(int i = 0; i < n; i++)
           tasks.Insert(MakeTask(maxStartTime, maxRunningTime)); 

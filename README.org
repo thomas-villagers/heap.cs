@@ -206,6 +206,8 @@ Both operations run in O(log n) time, but Insertion is way more fast. Tests show
 
 * Graphviz Output 
 
+** Extensions
+
 #+BEGIN_SRC csharp :tangle src/heapextensions.cs 
 using System;
 
@@ -249,6 +251,8 @@ public static class HeapExtensions {
   }
 }
 #+END_SRC
+
+** Example 
 
 Call extension method ~PrintDot~ and feed the results into [[http://www.graphviz.org/][Graphviz]]: 
 
@@ -314,7 +318,9 @@ digraph G {
 #+RESULTS:
 [[file:images/heap.png]]
 
-* Application: Task Schedule 
+* Application: Task Scheduling
+
+** Helper Classes
 
 #+BEGIN_SRC csharp :tangle demo/scheduler.cs
 using System;
@@ -386,7 +392,7 @@ public class TaskScheduler {
     for (int i = 0; i < machines.Count; i++) 
       Console.WriteLine("    \\draw(-0.4, {0}) node[left]{{Machine {1}}} -- ++ (0.4,0);", i+1+0.5, i+1); 
 
-    Console.WriteLine("  \\draw[thick,->](-0.2,0.8) -- ++({0},0);", maxTime+1); 
+    Console.WriteLine("  \\draw[thick,->](-0.2,0.8) -- ++({0},0) node[right]{{time}};", maxTime+1); 
     for (int i = 0; i < maxTime; i++) 
       Console.WriteLine("    \\draw({0}, 0.6) node[below]{{{1}}} -- ++ (0,0.4);", i+1, i+1); 
 
@@ -395,6 +401,8 @@ public class TaskScheduler {
 
 }
 #+END_SRC
+
+** Example 
 
 #+BEGIN_SRC csharp :tangle demo/taskschedule.cs
 using System;
@@ -442,6 +450,7 @@ mono demo/taskschedule.exe
     \draw(-0.4, 1.5) node[left]{Machine 1} -- ++ (0.4,0);
     \draw(-0.4, 2.5) node[left]{Machine 2} -- ++ (0.4,0);
     \draw(-0.4, 3.5) node[left]{Machine 3} -- ++ (0.4,0);
+  \draw[thick,->](-0.2,0.8) -- ++(10,0) node[right]{time};
     \draw(1, 0.6) node[below]{1} -- ++ (0,0.4);
     \draw(2, 0.6) node[below]{2} -- ++ (0,0.4);
     \draw(3, 0.6) node[below]{3} -- ++ (0,0.4);
@@ -451,15 +460,13 @@ mono demo/taskschedule.exe
     \draw(7, 0.6) node[below]{7} -- ++ (0,0.4);
     \draw(8, 0.6) node[below]{8} -- ++ (0,0.4);
     \draw(9, 0.6) node[below]{9} -- ++ (0,0.4);
-  \draw[thick,->](-0.2,0.8) -- ++(10,0);
 \end{tikzpicture}
 #+END_SRC
 
 #+RESULTS:
 [[file:images/schedule.png]]
 
-
-Another example: 
+** A more complex example
 
 #+BEGIN_SRC csharp :tangle demo/taskschedule2.cs
 using System;
@@ -476,7 +483,7 @@ class TaskSchedule {
 
     var random = new Random(); 
     var tasks = new Heap<Task>((x,y) => x.Key - y.Key); 
-    Func<int, int, Task> MakeTask = ((t1,t2) => {int x = random.Next(t1)+1; return new Task(x, x+random.Next(t2)+1);});
+    Func<int, int, Task> MakeTask = ((t1,t2) => {int x = random.Next(1,t1+1); return new Task(x, x+random.Next(1,t2+1));});
 
     for(int i = 0; i < n; i++)
       tasks.Insert(MakeTask(maxStartTime, maxRunningTime)); 
@@ -498,23 +505,23 @@ mono demo/taskschedule2.exe
 #+RESULTS:
 #+BEGIN_SRC latex :imagemagick yes :iminoptions -density 600 :imoutoptions -geometry 400 :results raw :yexports results :fit yes :noweb yes :file images/schedule2.png  :headers '("\\usepackage{tikz}")
 \begin{tikzpicture}[>=latex]
-  \draw[fill=blue!40](1,1.1) rectangle (5,1.8);
-  \draw[fill=blue!40](5,1.1) rectangle (9,1.8);
-  \draw[fill=blue!40](10,1.1) rectangle (15,1.8);
-  \draw[fill=blue!40](1,2.1) rectangle (4,2.8);
-  \draw[fill=blue!40](4,2.1) rectangle (5,2.8);
-  \draw[fill=blue!40](5,2.1) rectangle (7,2.8);
-  \draw[fill=blue!40](7,2.1) rectangle (12,2.8);
-  \draw[fill=blue!40](7,2.1) rectangle (7,2.8);
-  \draw[fill=blue!40](1,3.1) rectangle (8,3.8);
-  \draw[fill=blue!40](8,3.1) rectangle (9,3.8);
-  \draw[fill=blue!40](10,3.1) rectangle (16,3.8);
-  \draw[fill=blue!40](1,4.1) rectangle (6,4.8);
-  \draw[fill=blue!40](7,4.1) rectangle (13,4.8);
-  \draw[fill=blue!40](2,5.1) rectangle (9,5.8);
-  \draw[fill=blue!40](2,6.1) rectangle (7,6.8);
-  \draw[fill=blue!40](2,7.1) rectangle (4,7.8);
-  \draw[thick,->](-0.2,0.8) -- ++(0,8);
+  \draw[fill=blue!40](1,1.1) rectangle (6,1.8);
+  \draw[fill=blue!40](7,1.1) rectangle (10,1.8);
+  \draw[fill=blue!40](10,1.1) rectangle (17,1.8);
+  \draw[fill=blue!40](2,2.1) rectangle (10,2.8);
+  \draw[fill=blue!40](10,2.1) rectangle (16,2.8);
+  \draw[fill=blue!40](2,3.1) rectangle (4,3.8);
+  \draw[fill=blue!40](4,3.1) rectangle (10,3.8);
+  \draw[fill=blue!40](2,4.1) rectangle (4,4.8);
+  \draw[fill=blue!40](5,4.1) rectangle (6,4.8);
+  \draw[fill=blue!40](7,4.1) rectangle (14,4.8);
+  \draw[fill=blue!40](3,5.1) rectangle (8,5.8);
+  \draw[fill=blue!40](8,5.1) rectangle (11,5.8);
+  \draw[fill=blue!40](5,6.1) rectangle (9,6.8);
+  \draw[fill=blue!40](9,6.1) rectangle (15,6.8);
+  \draw[fill=blue!40](5,7.1) rectangle (11,7.8);
+  \draw[fill=blue!40](9,8.1) rectangle (17,8.8);
+  \draw[thick,->](-0.2,0.8) -- ++(0,9);
     \draw(-0.4, 1.5) node[left]{Machine 1} -- ++ (0.4,0);
     \draw(-0.4, 2.5) node[left]{Machine 2} -- ++ (0.4,0);
     \draw(-0.4, 3.5) node[left]{Machine 3} -- ++ (0.4,0);
@@ -522,6 +529,8 @@ mono demo/taskschedule2.exe
     \draw(-0.4, 5.5) node[left]{Machine 5} -- ++ (0.4,0);
     \draw(-0.4, 6.5) node[left]{Machine 6} -- ++ (0.4,0);
     \draw(-0.4, 7.5) node[left]{Machine 7} -- ++ (0.4,0);
+    \draw(-0.4, 8.5) node[left]{Machine 8} -- ++ (0.4,0);
+  \draw[thick,->](-0.2,0.8) -- ++(18,0) node[right]{time};
     \draw(1, 0.6) node[below]{1} -- ++ (0,0.4);
     \draw(2, 0.6) node[below]{2} -- ++ (0,0.4);
     \draw(3, 0.6) node[below]{3} -- ++ (0,0.4);
@@ -538,7 +547,7 @@ mono demo/taskschedule2.exe
     \draw(14, 0.6) node[below]{14} -- ++ (0,0.4);
     \draw(15, 0.6) node[below]{15} -- ++ (0,0.4);
     \draw(16, 0.6) node[below]{16} -- ++ (0,0.4);
-  \draw[thick,->](-0.2,0.8) -- ++(17,0);
+    \draw(17, 0.6) node[below]{17} -- ++ (0,0.4);
 \end{tikzpicture}
 #+END_SRC
 

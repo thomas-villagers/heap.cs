@@ -67,7 +67,7 @@ public class TaskScheduler {
     for (int i = 0; i < machines.Count; i++) 
       Console.WriteLine("    \\draw(-0.4, {0}) node[left]{{Machine {1}}} -- ++ (0.4,0);", i+1+0.5, i+1); 
 
-    Console.WriteLine("  \\draw[thick,->](-0.2,0.8) -- ++({0},0);", maxTime+1); 
+    Console.WriteLine("  \\draw[thick,->](-0.2,0.8) -- ++({0},0) node[right]{{time}};", maxTime+1); 
     for (int i = 0; i < maxTime; i++) 
       Console.WriteLine("    \\draw({0}, 0.6) node[below]{{{1}}} -- ++ (0,0.4);", i+1, i+1); 
 

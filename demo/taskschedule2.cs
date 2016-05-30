@@ -12,7 +12,7 @@ class TaskSchedule {
 
     var random = new Random(); 
     var tasks = new Heap<Task>((x,y) => x.Key - y.Key); 
-    Func<int, int, Task> MakeTask = ((t1,t2) => {int x = random.Next(t1)+1; return new Task(x, x+random.Next(t2)+1);});
+    Func<int, int, Task> MakeTask = ((t1,t2) => {int x = random.Next(1,t1+1); return new Task(x, x+random.Next(1,t2+1));});
 
     for(int i = 0; i < n; i++)
       tasks.Insert(MakeTask(maxStartTime, maxRunningTime)); 
