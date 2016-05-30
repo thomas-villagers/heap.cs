@@ -196,7 +196,7 @@ Sort a Million numbers
 
     Generating 1000000 random elements...
     Sorting 1000000 random elements...
-    Insertion: 91 Removal: 808 Combined: 899
+    Insertion: 65 Removal: 769 Combined: 834
 
 Note:  Insertion is very fast while Removal is kind of slow. 
 
@@ -394,7 +394,7 @@ Another example:
     
         var random = new Random(); 
         var tasks = new Heap<Task>((x,y) => x.Key - y.Key); 
-        Func<int, int, Task>  MakeTask = ((t1,t2) => {int x = random.Next(t1)+1; return new Task(x, x+random.Next(t2));});
+        Func<int, int, Task> MakeTask = ((t1,t2) => {int x = random.Next(t1)+1; return new Task(x, x+random.Next(t2)+1);});
     
         for(int i = 0; i < n; i++)
           tasks.Insert(MakeTask(maxStartTime, maxRunningTime)); 
