@@ -20,7 +20,8 @@ public static class HeapExtensions {
       PrintSubTree(heap, leftChild, ref empties);
     } else {
       Console.WriteLine("  \"{0}\" [shape=rectangle];", heap.list[index]);
-      PrintNode(heap.list[index], empties++);
+      return;
+//      PrintNode(heap.list[index], empties++);
     }
 
     int rightChild = Heap<T>.RightChildIndex(index); 

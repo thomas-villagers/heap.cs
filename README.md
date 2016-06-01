@@ -174,6 +174,7 @@ Note:  Removal of the last element in a List<T> is O(1) (see <http://referenceso
 Sort a Million numbers
 
     using System; 
+    using System.Linq; 
     using System.Collections.Generic; 
     using System.Diagnostics; 
     
@@ -183,15 +184,13 @@ Sort a Million numbers
     
         int n = 1000000;
         var random = new Random();
-        var L = new List<int>(n);
         Console.WriteLine("Generating {0} random elements...", n); 
-        for(int i = 0; i < n; i++)
-          L.Add(random.Next()); 
+        var numbers = Enumerable.Range(0,n).Select(x => random.Next());
     
         var H = new Heap<int>();
         Console.WriteLine("Sorting {0} random elements...", n); 
         var sw = Stopwatch.StartNew(); 
-        foreach(var i in L) 
+        foreach(var i in numbers) 
           H.Insert(i); 
         var elapsedInsert = sw.ElapsedMilliseconds;
         while(H.Count > 0) 
@@ -207,9 +206,9 @@ Sort a Million numbers
 
     Generating 1000000 random elements...
     Sorting 1000000 random elements...
-    Insertion: 61 Removal: 765 Combined: 826
+    Insertion: 126 Removal: 833 Combined: 959
 
-Note:  Insertion is very fast while Removal is kind of slow. 
+Note:  Insertion is very fast, Removal is comparably slow. 
 
 Both operations run in O(log n) time, but Insertion is way more fast. Tests show that in practice Up Bubbling rarely exceeds a few levels, while Down Bubbling almost *always* needs to process the whole tree height. 
 
@@ -239,7 +238,7 @@ Both operations run in O(log n) time, but Insertion is way more fast. Tests show
           PrintSubTree(heap, leftChild, ref empties);
         } else {
           Console.WriteLine("  \"{0}\" [shape=rectangle];", heap.list[index]);
-          PrintNode(heap.list[index], empties++);
+          return;
         }
     
         int rightChild = Heap<T>.RightChildIndex(index); 

@@ -4,70 +4,70 @@
 
 An array based implementation of a heap.
 
-#+BEGIN_SRC csharp :tangle src/heap.cs 
-  using System;
-  using System.Collections.Generic; 
+#+BEGIN_SRC csharp
+using System;
+using System.Collections.Generic; 
 
-  public class Heap<T> {
+public class Heap<T> {
 
-    public List<T> list;  
-    Func<T, T, int> compare; 
+  public List<T> list;  
+  Func<T, T, int> compare; 
 
-    public Heap(Func<T, T, int> compare) {
-      list = new List<T>();
-      this.compare = compare; 
-    }
+  public Heap(Func<T, T, int> compare) {
+    list = new List<T>();
+    this.compare = compare; 
+  }
 
-    public Heap() : this((x,y) => Comparer<T>.Default.Compare(x,y)) { }
+  public Heap() : this((x,y) => Comparer<T>.Default.Compare(x,y)) { }
 
-    public int Count {
-      get { return list.Count; }
-    }
+  public int Count {
+    get { return list.Count; }
+  }
 
-    public void Insert(T value) {
-      int index = list.Count; 
-      list.Add(value); 
-      int parentIndex = ParentIndex(index); 
-      while(index > 0 && compare(list[index], list[parentIndex]) < 0) {
-        Swap(index, parentIndex);
-        index = parentIndex; 
-        parentIndex = ParentIndex(index); 
-      }
-    }
-
-    public T Remove() {
-      if (list.Count == 0) throw new ArgumentOutOfRangeException("Cannot remove Element from empty Heap"); 
-      T value = list[0];
-      list[0] = list[list.Count-1];
-      list.RemoveAt(list.Count-1); 
-      int index = 0;                    
-      while(index < list.Count) {
-    
-        int leftChildIndex = LeftChildIndex(index);
-        if (leftChildIndex >= list.Count) break; 
-
-        int childIndex = leftChildIndex; 
-        int rightChildIndex = RightChildIndex(index); 
-        if (rightChildIndex < list.Count && compare(list[rightChildIndex], list[leftChildIndex]) < 0 ) {
-          childIndex = rightChildIndex;
-        } 
-        if (compare(list[index], list[childIndex]) < 0) break; 
-        Swap(index,childIndex);
-        index = childIndex;
-      }
-      return value; 
-    }
-
-    public static int ParentIndex(int index) { return (index-1)/2; } 
-    public static int LeftChildIndex(int index) { return index*2+1; } 
-    public static int RightChildIndex(int index) { return index*2+2; } 
-
-    private void Swap(int i1, int i2) {
-      T temp = list[i1];
-      list[i1] = list[i2];
-      list[i2] = temp; 
+  public void Insert(T value) {
+    int index = list.Count; 
+    list.Add(value); 
+    int parentIndex = ParentIndex(index); 
+    while(index > 0 && compare(list[index], list[parentIndex]) < 0) {
+      Swap(index, parentIndex);
+      index = parentIndex; 
+      parentIndex = ParentIndex(index); 
     }
   }
+
+  public T Remove() {
+    if (list.Count == 0) throw new ArgumentOutOfRangeException("Cannot remove Element from empty Heap"); 
+    T value = list[0];
+    list[0] = list[list.Count-1];
+    list.RemoveAt(list.Count-1); 
+    int index = 0;                    
+    while(index < list.Count) {
+
+      int leftChildIndex = LeftChildIndex(index);
+      if (leftChildIndex >= list.Count) break; 
+
+      int childIndex = leftChildIndex; 
+      int rightChildIndex = RightChildIndex(index); 
+      if (rightChildIndex < list.Count && compare(list[rightChildIndex], list[leftChildIndex]) < 0 ) {
+	childIndex = rightChildIndex;
+      } 
+      if (compare(list[index], list[childIndex]) < 0) break; 
+      Swap(index,childIndex);
+      index = childIndex;
+    }
+    return value; 
+  }
+
+  public static int ParentIndex(int index) { return (index-1)/2; } 
+  public static int LeftChildIndex(int index) { return index*2+1; } 
+  public static int RightChildIndex(int index) { return index*2+2; } 
+
+  private void Swap(int i1, int i2) {
+    T temp = list[i1];
+    list[i1] = list[i2];
+    list[i2] = temp; 
+  }
+}
 #+END_SRC
 
 - Insertion :: O(log n)
@@ -79,7 +79,7 @@ Note:  Removal of the last element in a List<T> is O(1) (see http://referencesou
 
 ** Simple Test
 
-#+BEGIN_SRC csharp :tangle demo/test.cs 
+#+BEGIN_SRC csharp
 using System; 
 
 public class Test {
@@ -101,13 +101,12 @@ public class Test {
 }
 #+END_SRC
 
-#+BEGIN_SRC sh :results output :exports both
+#+BEGIN_SRC sh
 mcs demo/test.cs src/heap.cs
 mono demo/test.exe
 #+END_SRC
 
 #+RESULTS:
-: Compilation failed: 2 error(s), 0 warnings
 : 1
 : 2
 : 3
@@ -118,7 +117,7 @@ mono demo/test.exe
 
 ** Reverse Order 
 
-#+BEGIN_SRC csharp :tangle demo/testcompare.cs 
+#+BEGIN_SRC csharp
 using System; 
 
 public class TestCompare {
@@ -140,7 +139,7 @@ public class TestCompare {
 }
 #+END_SRC
 
-#+BEGIN_SRC sh :results output :exports both
+#+BEGIN_SRC sh
 mcs demo/testcompare.cs src/heap.cs
 mono demo/testcompare.exe
 #+END_SRC
@@ -158,8 +157,9 @@ mono demo/testcompare.exe
 
 Sort a Million numbers
 
-#+BEGIN_SRC csharp :tangle demo/heapsort.cs 
+#+BEGIN_SRC csharp
 using System; 
+using System.Linq; 
 using System.Collections.Generic; 
 using System.Diagnostics; 
 
@@ -169,15 +169,13 @@ public class Heapsort {
 
     int n = 1000000;
     var random = new Random();
-    var L = new List<int>(n);
     Console.WriteLine("Generating {0} random elements...", n); 
-    for(int i = 0; i < n; i++)
-      L.Add(random.Next()); 
+    var numbers = Enumerable.Range(0,n).Select(x => random.Next());
 
     var H = new Heap<int>();
     Console.WriteLine("Sorting {0} random elements...", n); 
     var sw = Stopwatch.StartNew(); 
-    foreach(var i in L) 
+    foreach(var i in numbers) 
       H.Insert(i); 
     var elapsedInsert = sw.ElapsedMilliseconds;
     while(H.Count > 0) 
@@ -189,7 +187,7 @@ public class Heapsort {
 }
 #+END_SRC
 
-#+BEGIN_SRC sh :results verbatim :exports both
+#+BEGIN_SRC sh
 mcs demo/heapsort.cs src/heap.cs 
 mono demo/heapsort.exe
 #+END_SRC
@@ -197,9 +195,9 @@ mono demo/heapsort.exe
 #+RESULTS:
 : Generating 1000000 random elements...
 : Sorting 1000000 random elements...
-: Insertion: 61 Removal: 773 Combined: 834
+: Insertion: 126 Removal: 833 Combined: 959
 
-Note:  Insertion is very fast while Removal is kind of slow. 
+Note:  Insertion is very fast, Removal is comparably slow. 
 
 Both operations run in O(log n) time, but Insertion is way more fast. Tests show that in practice Up Bubbling rarely exceeds a few levels, while Down Bubbling almost /always/ needs to process the whole tree height. 
 
@@ -208,7 +206,7 @@ Both operations run in O(log n) time, but Insertion is way more fast. Tests show
 
 ** Extensions
 
-#+BEGIN_SRC csharp :tangle src/heapextensions.cs 
+#+BEGIN_SRC csharp
 using System;
 
 public static class HeapExtensions {
@@ -231,7 +229,7 @@ public static class HeapExtensions {
       PrintSubTree(heap, leftChild, ref empties);
     } else {
       Console.WriteLine("  \"{0}\" [shape=rectangle];", heap.list[index]);
-      PrintNode(heap.list[index], empties++);
+      return;
     }
 
     int rightChild = Heap<T>.RightChildIndex(index); 
@@ -242,7 +240,7 @@ public static class HeapExtensions {
       PrintNode(heap.list[index], empties++);
     }
   }
-  
+
   public static void PrintDot<T>(this Heap<T> heap) {
     Console.WriteLine("digraph G {");
     int empties = 0;
@@ -256,7 +254,7 @@ public static class HeapExtensions {
 
 Call extension method ~PrintDot~ and feed the results into [[http://www.graphviz.org/][Graphviz]]: 
 
-#+BEGIN_SRC csharp :tangle demo/heaptree.cs
+#+BEGIN_SRC csharp
 class HeapTree {
   public static void Main() {
     var H = new Heap<int>();
@@ -274,46 +272,11 @@ class HeapTree {
 }
 #+END_SRC
 
-#+BEGIN_SRC sh :results verbatim :wrap "SRC dot :file images/heap.png" :exports both
+#+BEGIN_SRC sh
 mcs demo/heaptree.cs src/heap.cs src/heapextensions.cs 
 mono demo/heaptree.exe
 #+END_SRC
 
-
-#+RESULTS:
-#+BEGIN_SRC dot :file images/heap.png
-digraph G {
-  "1" -> "4"
-  "4" -> "5"
-  "5" -> "8"
-  "8" [shape=rectangle];
-  empty0 [label="", style=invis];
-  "8" -> empty0
-  empty1 [label="", style=invis];
-  "8" -> empty1
-  empty2 [label="", style=invis];
-  "5" -> empty2
-  "4" -> "7"
-  "7" [shape=rectangle];
-  empty3 [label="", style=invis];
-  "7" -> empty3
-  empty4 [label="", style=invis];
-  "7" -> empty4
-  "1" -> "2"
-  "2" -> "6"
-  "6" [shape=rectangle];
-  empty5 [label="", style=invis];
-  "6" -> empty5
-  empty6 [label="", style=invis];
-  "6" -> empty6
-  "2" -> "3"
-  "3" [shape=rectangle];
-  empty7 [label="", style=invis];
-  "3" -> empty7
-  empty8 [label="", style=invis];
-  "3" -> empty8
-}
-#+END_SRC
 
 #+RESULTS:
 [[file:images/heap.png]]
@@ -322,14 +285,14 @@ digraph G {
 
 ** Helper Classes
 
-#+BEGIN_SRC csharp :tangle demo/scheduler.cs
+#+BEGIN_SRC csharp
 using System;
 using System.Collections.Generic; 
 
 using Task = System.Collections.Generic.KeyValuePair<int, int>; 
 
 public class TaskScheduler {
-  
+
   public class Machine {
     public List<Task> tasks; 
     public Machine() {  
@@ -344,7 +307,7 @@ public class TaskScheduler {
 
     public bool Conflicts(Task task) {
       foreach(var t in tasks) {
-        if (Overlaps(t, task) == true) return true; 
+	if (Overlaps(t, task) == true) return true; 
       }
       return false;
     }
@@ -359,12 +322,12 @@ public class TaskScheduler {
   public TaskScheduler() {
     machines = new List<Machine>();
   }
-  
+
   public void Schedule(Task task) {
     bool scheduled = false; 
     foreach(var m in machines) {
       if (!m.Conflicts(task)) {
-        m.Add(task);
+	m.Add(task);
 	scheduled = true;
 	break;
       } 
@@ -383,7 +346,7 @@ public class TaskScheduler {
     int maxTime = 0; 
     foreach (var machine in machines) {
       foreach(var task in machine.tasks) { 
-        Console.WriteLine("  \\draw[fill=blue!40]({0},{1}) rectangle ({2},{3});",task.Key, y+0.1, task.Value, y+0.8);  
+	Console.WriteLine("  \\draw[fill=blue!40]({0},{1}) rectangle ({2},{3});",task.Key, y+0.1, task.Value, y+0.8);  
 	maxTime = maxTime < task.Value ? task.Value : maxTime; 
       }
       y++; 
@@ -404,7 +367,7 @@ public class TaskScheduler {
 
 ** Example 
 
-#+BEGIN_SRC csharp :tangle demo/taskschedule.cs
+#+BEGIN_SRC csharp
 using System;
 using System.Collections.Generic; 
 
@@ -431,7 +394,7 @@ class TaskSchedule {
 
 #+END_SRC
 
-#+BEGIN_SRC sh :results verbatim :wrap "SRC latex :imagemagick yes :iminoptions -density 600 :imoutoptions -geometry 400 :results raw :yexports results :fit yes :noweb yes :file images/schedule.png  :headers '(\"\\\\usepackage{tikz}\")" :exports both
+#+BEGIN_SRC sh
 mcs demo/taskschedule.cs demo/scheduler.cs src/heap.cs
 mono demo/taskschedule.exe
 #+END_SRC
