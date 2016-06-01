@@ -8,7 +8,7 @@ class TaskSchedule {
 
     int n = 16; 
     int maxStartTime = 10; 
-    int maxRunningTime = 8; 
+    int maxRunningTime = 6; 
 
     var random = new Random(); 
     var tasks = new Heap<Task>((x,y) => x.Key - y.Key); 
