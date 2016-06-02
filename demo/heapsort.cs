@@ -12,11 +12,10 @@ public class Heapsort {
     Console.WriteLine("Generating {0} random elements...", n); 
     var numbers = Enumerable.Range(0,n).Select(x => random.Next());
 
-    var H = new Heap<int>();
     Console.WriteLine("Sorting {0} random elements...", n); 
     var sw = Stopwatch.StartNew(); 
-    foreach(var i in numbers) 
-      H.Insert(i); 
+    var H = Heap<int>.FromList(numbers.ToList());
+    
     var elapsedInsert = sw.ElapsedMilliseconds;
     while(H.Count > 0) 
       H.Remove();

@@ -3,24 +3,20 @@
 <div id="text-table-of-contents">
 <ul>
 <li><a href="#orgheadline1">1. Generic Heap</a></li>
-<li><a href="#orgheadline5">2. Demo</a>
+<li><a href="#orgheadline2">2. Graphviz Extension</a></li>
+<li><a href="#orgheadline7">3. Demo</a>
 <ul>
-<li><a href="#orgheadline2">2.1. Simple Test</a></li>
-<li><a href="#orgheadline3">2.2. Reverse Order</a></li>
-<li><a href="#orgheadline4">2.3. Heap Sort Performance</a></li>
+<li><a href="#orgheadline3">3.1. Simple Tests</a></li>
+<li><a href="#orgheadline4">3.2. Reverse Order</a></li>
+<li><a href="#orgheadline5">3.3. Heap Sort Performance</a></li>
+<li><a href="#orgheadline6">3.4. Draw as Tree</a></li>
 </ul>
 </li>
-<li><a href="#orgheadline8">3. Graphviz Output</a>
+<li><a href="#orgheadline11">4. Application: Task Scheduling</a>
 <ul>
-<li><a href="#orgheadline6">3.1. Extensions</a></li>
-<li><a href="#orgheadline7">3.2. Example</a></li>
-</ul>
-</li>
-<li><a href="#orgheadline12">4. Application: Task Scheduling</a>
-<ul>
-<li><a href="#orgheadline9">4.1. Helper Classes</a></li>
-<li><a href="#orgheadline10">4.2. Example</a></li>
-<li><a href="#orgheadline11">4.3. A more complex example</a></li>
+<li><a href="#orgheadline8">4.1. Helper Classes</a></li>
+<li><a href="#orgheadline9">4.2. Example</a></li>
+<li><a href="#orgheadline10">4.3. A more complex example</a></li>
 </ul>
 </li>
 </ul>
@@ -67,7 +63,24 @@ An array based implementation of a heap.
         T value = list[0];
         list[0] = list[list.Count-1];
         list.RemoveAt(list.Count-1); 
-        int index = 0;                    
+        Heapify(0); 
+        return value; 
+      }
+    
+      public static Heap<T> FromList(List<T> list, Func<T, T, int> compare) {
+        Heap<T> H = new Heap<T>(compare); 
+        if (list.Count == 0) return H; 
+        H.list = list; 
+        for (int i = list.Count/2-1; i>=0; i--)
+          H.Heapify(i);
+        return H; 
+      }
+    
+      public static Heap<T> FromList(List<T> list) {
+        return FromList(list, (x,y) => Comparer<T>.Default.Compare(x,y)); 
+      }
+    
+      private void Heapify(int index) {
         while(index < list.Count) {
     
           int leftChildIndex = LeftChildIndex(index);
@@ -82,7 +95,6 @@ An array based implementation of a heap.
           Swap(index,childIndex);
           index = childIndex;
         }
-        return value; 
       }
     
       public static int ParentIndex(int index) { return (index-1)/2; } 
@@ -96,125 +108,13 @@ An array based implementation of a heap.
       }
     }
 
--   **Insertion:** O(log n)
--   **Removal:** O(log n)
+-   **`Insert`:** O(log n)
+-   **`Remove`:** O(log n)
+-   **`FromList`:** O(n)
 
-Note:  Removal of the last element in a List<T> is O(1) (see <http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646>), O(n) otherwise. 
+Note:  Removal of the last element in a `List<T>` is O(1) (see <http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646>), O(n) otherwise. 
 
-# Demo<a id="orgheadline5"></a>
-
-## Simple Test<a id="orgheadline2"></a>
-
-    using System; 
-    
-    public class Test {
-    
-      public static void Main() {
-    
-        var H = new Heap<int>();
-        H.Insert(7);
-        H.Insert(4);
-        H.Insert(6);
-        H.Insert(3);
-        H.Insert(2);
-        H.Insert(5);
-        H.Insert(1);
-    
-        while(H.Count > 0) 
-          Console.WriteLine(H.Remove());
-      }
-    }
-
-    mcs demo/test.cs src/heap.cs
-    mono demo/test.exe
-
-    1
-    2
-    3
-    4
-    5
-    6
-    7
-
-## Reverse Order<a id="orgheadline3"></a>
-
-    using System; 
-    
-    public class TestCompare {
-    
-      public static void Main() {
-    
-        var H = new Heap<int>((x,y) => y - x);
-        H.Insert(7);
-        H.Insert(4);
-        H.Insert(6);
-        H.Insert(3);
-        H.Insert(2);
-        H.Insert(5);
-        H.Insert(1);
-    
-        while(H.Count > 0) 
-          Console.WriteLine(H.Remove());
-      }
-    }
-
-    mcs demo/testcompare.cs src/heap.cs
-    mono demo/testcompare.exe
-
-    7
-    6
-    5
-    4
-    3
-    2
-    1
-
-## Heap Sort Performance<a id="orgheadline4"></a>
-
-Sort a Million numbers
-
-    using System; 
-    using System.Linq; 
-    using System.Collections.Generic; 
-    using System.Diagnostics; 
-    
-    public class Heapsort {
-    
-      public static void Main() {
-    
-        int n = 1000000;
-        var random = new Random();
-        Console.WriteLine("Generating {0} random elements...", n); 
-        var numbers = Enumerable.Range(0,n).Select(x => random.Next());
-    
-        var H = new Heap<int>();
-        Console.WriteLine("Sorting {0} random elements...", n); 
-        var sw = Stopwatch.StartNew(); 
-        foreach(var i in numbers) 
-          H.Insert(i); 
-        var elapsedInsert = sw.ElapsedMilliseconds;
-        while(H.Count > 0) 
-          H.Remove();
-        var elapsedRemove = sw.ElapsedMilliseconds;
-        sw.Stop(); 
-        Console.WriteLine("Insertion: {0} Removal: {1} Combined: {2}", elapsedInsert, elapsedRemove, elapsedInsert + elapsedRemove); 
-      }
-    }
-
-    mcs demo/heapsort.cs src/heap.cs 
-    mono demo/heapsort.exe
-
-    Generating 1000000 random elements...
-    Sorting 1000000 random elements...
-    Insertion: 126 Removal: 833 Combined: 959
-
-Note:  Insertion is very fast, Removal is comparably slow. 
-
-Both operations run in O(log n) time, but Insertion is way more fast. Tests show that in practice Up Bubbling rarely exceeds a few levels, while Down Bubbling almost *always* needs to process the whole tree height. 
-
-# Graphviz Output<a id="orgheadline8"></a>
-
-## Extensions<a id="orgheadline6"></a>
+# Graphviz Extension<a id="orgheadline2"></a>
 
     using System;
     
@@ -258,7 +158,113 @@ Both operations run in O(log n) time, but Insertion is way more fast. Tests show
       }
     }
 
-## Example<a id="orgheadline7"></a>
+# Demo<a id="orgheadline7"></a>
+
+## Simple Tests<a id="orgheadline3"></a>
+
+    using System; 
+    using System.Linq; 
+    using System.Collections.Generic; 
+    
+    public class Test {
+    
+      public static void Main() {
+    
+        var H = new Heap<int>();
+        H.Insert(7);
+        H.Insert(4);
+        H.Insert(6);
+        H.Insert(3);
+        H.Insert(2);
+        H.Insert(5);
+        H.Insert(1);
+        H.Insert(8);
+    
+        while(H.Count > 0) 
+          Console.Write(H.Remove() + " ");
+    
+        var L = Enumerable.Range(1,8); 
+        Console.WriteLine();
+        H = Heap<int>.FromList(L.ToList()); 
+    
+        while(H.Count > 0) 
+          Console.Write(H.Remove() + " ");
+    
+      }
+    }
+
+    mcs demo/test.cs src/heap.cs
+    mono demo/test.exe
+
+    1 2 3 4 5 6 7 8 
+    1 2 3 4 5 6 7 8
+
+## Reverse Order<a id="orgheadline4"></a>
+
+    using System; 
+    
+    public class TestCompare {
+    
+      public static void Main() {
+    
+        var H = new Heap<int>((x,y) => y - x);
+        H.Insert(7);
+        H.Insert(4);
+        H.Insert(6);
+        H.Insert(3);
+        H.Insert(2);
+        H.Insert(5);
+        H.Insert(1);
+    
+        while(H.Count > 0) 
+          Console.Write(H.Remove() + " ");
+      }
+    }
+
+    mcs demo/testcompare.cs src/heap.cs
+    mono demo/testcompare.exe
+
+    7 6 5 4 3 2 1
+
+## Heap Sort Performance<a id="orgheadline5"></a>
+
+Sort a Million numbers
+
+    using System; 
+    using System.Linq; 
+    using System.Collections.Generic; 
+    using System.Diagnostics; 
+    
+    public class Heapsort {
+    
+      public static void Main() {
+    
+        int n = 1000000;
+        var random = new Random();
+        Console.WriteLine("Generating {0} random elements...", n); 
+        var numbers = Enumerable.Range(0,n).Select(x => random.Next());
+    
+        Console.WriteLine("Sorting {0} random elements...", n); 
+        var sw = Stopwatch.StartNew(); 
+        var H = Heap<int>.FromList(numbers.ToList());
+    
+        var elapsedInsert = sw.ElapsedMilliseconds;
+        while(H.Count > 0) 
+          H.Remove();
+        var elapsedRemove = sw.ElapsedMilliseconds;
+        sw.Stop(); 
+        Console.WriteLine("Insertion: {0} Removal: {1} Combined: {2}", elapsedInsert, elapsedRemove, elapsedInsert + elapsedRemove); 
+      }
+    }
+
+    mcs demo/heapsort.cs src/heap.cs 
+    mono demo/heapsort.exe
+
+    Generating 1000000 random elements...
+    Sorting 1000000 random elements...
+    Insertion: 111 Removal: 790 Combined: 901
+
+## Draw as Tree<a id="orgheadline6"></a>
 
 Call extension method `PrintDot` and feed the results into [Graphviz](http://www.graphviz.org/): 
 
@@ -273,7 +279,6 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
         H.Insert(1);
         H.Insert(3);
         H.Insert(4);
-    
         H.PrintDot(); 
       }
     }
@@ -283,9 +288,9 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
 
 ![img](images/heap.png)
 
-# Application: Task Scheduling<a id="orgheadline12"></a>
+# Application: Task Scheduling<a id="orgheadline11"></a>
 
-## Helper Classes<a id="orgheadline9"></a>
+## Helper Classes<a id="orgheadline8"></a>
 
     using System;
     using System.Collections.Generic; 
@@ -365,7 +370,7 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
     
     }
 
-## Example<a id="orgheadline10"></a>
+## Example<a id="orgheadline9"></a>
 
     using System;
     using System.Collections.Generic; 
@@ -396,7 +401,7 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
 
 ![img](images/schedule.png)
 
-## A more complex example<a id="orgheadline11"></a>
+## A more complex example<a id="orgheadline10"></a>
 
     using System;
     using System.Collections.Generic; 
@@ -408,7 +413,7 @@ Call extension method `PrintDot` and feed the results into [Graphviz](http://www
     
         int n = 16; 
         int maxStartTime = 10; 
-        int maxRunningTime = 8; 
+        int maxRunningTime = 6; 
     
         var random = new Random(); 
         var tasks = new Heap<Task>((x,y) => x.Key - y.Key); 

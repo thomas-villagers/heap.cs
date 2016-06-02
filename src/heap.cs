@@ -33,9 +33,26 @@ public class Heap<T> {
     T value = list[0];
     list[0] = list[list.Count-1];
     list.RemoveAt(list.Count-1); 
-    int index = 0;                    
+    Heapify(0); 
+    return value; 
+  }
+
+  public static Heap<T> FromList(List<T> list, Func<T, T, int> compare) {
+    Heap<T> H = new Heap<T>(compare); 
+    if (list.Count == 0) return H; 
+    H.list = list; 
+    for (int i = list.Count/2-1; i>=0; i--)
+      H.Heapify(i);
+    return H; 
+  }
+
+  public static Heap<T> FromList(List<T> list) {
+    return FromList(list, (x,y) => Comparer<T>.Default.Compare(x,y)); 
+  }
+
+  private void Heapify(int index) {
     while(index < list.Count) {
-  
+
       int leftChildIndex = LeftChildIndex(index);
       if (leftChildIndex >= list.Count) break; 
 
@@ -48,7 +65,6 @@ public class Heap<T> {
       Swap(index,childIndex);
       index = childIndex;
     }
-    return value; 
   }
 
   public static int ParentIndex(int index) { return (index-1)/2; } 

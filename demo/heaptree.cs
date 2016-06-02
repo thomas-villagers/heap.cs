@@ -9,7 +9,6 @@ class HeapTree {
     H.Insert(1);
     H.Insert(3);
     H.Insert(4);
-
     H.PrintDot(); 
   }
 }

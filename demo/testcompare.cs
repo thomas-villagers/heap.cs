@@ -14,6 +14,6 @@ public class TestCompare {
     H.Insert(1);
 
     while(H.Count > 0) 
-      Console.WriteLine(H.Remove());
+      Console.Write(H.Remove() + " ");
   }
 }

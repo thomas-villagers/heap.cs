@@ -1,4 +1,6 @@
 using System; 
+using System.Linq; 
+using System.Collections.Generic; 
 
 public class Test {
 
@@ -12,8 +14,17 @@ public class Test {
     H.Insert(2);
     H.Insert(5);
     H.Insert(1);
+    H.Insert(8);
 
     while(H.Count > 0) 
-      Console.WriteLine(H.Remove());
+      Console.Write(H.Remove() + " ");
+
+    var L = Enumerable.Range(1,8); 
+    Console.WriteLine();
+    H = Heap<int>.FromList(L.ToList()); 
+
+    while(H.Count > 0) 
+      Console.Write(H.Remove() + " ");
+
   }
 }

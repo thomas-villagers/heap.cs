@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Task = System.Collections.Generic.KeyValuePair<int, int>; 
 
 public class TaskScheduler {
-  
+
   public class Machine {
     public List<Task> tasks; 
     public Machine() {  
@@ -34,7 +34,7 @@ public class TaskScheduler {
   public TaskScheduler() {
     machines = new List<Machine>();
   }
-  
+
   public void Schedule(Task task) {
     bool scheduled = false; 
     foreach(var m in machines) {

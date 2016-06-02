@@ -4,7 +4,7 @@
 
 An array based implementation of a heap.
 
-#+BEGIN_SRC csharp
+#+BEGIN_SRC csharp :tangle src/heap.cs 
 using System;
 using System.Collections.Generic; 
 
@@ -40,7 +40,24 @@ public class Heap<T> {
     T value = list[0];
     list[0] = list[list.Count-1];
     list.RemoveAt(list.Count-1); 
-    int index = 0;                    
+    Heapify(0); 
+    return value; 
+  }
+
+  public static Heap<T> FromList(List<T> list, Func<T, T, int> compare) {
+    Heap<T> H = new Heap<T>(compare); 
+    if (list.Count == 0) return H; 
+    H.list = list; 
+    for (int i = list.Count/2-1; i>=0; i--)
+      H.Heapify(i);
+    return H; 
+  }
+
+  public static Heap<T> FromList(List<T> list) {
+    return FromList(list, (x,y) => Comparer<T>.Default.Compare(x,y)); 
+  }
+
+  private void Heapify(int index) {
     while(index < list.Count) {
 
       int leftChildIndex = LeftChildIndex(index);
@@ -55,7 +72,6 @@ public class Heap<T> {
       Swap(index,childIndex);
       index = childIndex;
     }
-    return value; 
   }
 
   public static int ParentIndex(int index) { return (index-1)/2; } 
@@ -70,143 +86,17 @@ public class Heap<T> {
 }
 #+END_SRC
 
-- Insertion :: O(log n)
-- Removal :: O(log n)
+- =Insert= :: O(log n)
+- =Remove= :: O(log n)
+- =FromList= :: O(n) 
 
-Note:  Removal of the last element in a List<T> is O(1) (see http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646), O(n) otherwise. 
-
-* Demo 
-
-** Simple Test
-
-#+BEGIN_SRC csharp
-using System; 
-
-public class Test {
-
-  public static void Main() {
-
-    var H = new Heap<int>();
-    H.Insert(7);
-    H.Insert(4);
-    H.Insert(6);
-    H.Insert(3);
-    H.Insert(2);
-    H.Insert(5);
-    H.Insert(1);
-
-    while(H.Count > 0) 
-      Console.WriteLine(H.Remove());
-  }
-}
-#+END_SRC
-
-#+BEGIN_SRC sh
-mcs demo/test.cs src/heap.cs
-mono demo/test.exe
-#+END_SRC
-
-#+RESULTS:
-: 1
-: 2
-: 3
-: 4
-: 5
-: 6
-: 7
-
-** Reverse Order 
-
-#+BEGIN_SRC csharp
-using System; 
-
-public class TestCompare {
-
-  public static void Main() {
-
-    var H = new Heap<int>((x,y) => y - x);
-    H.Insert(7);
-    H.Insert(4);
-    H.Insert(6);
-    H.Insert(3);
-    H.Insert(2);
-    H.Insert(5);
-    H.Insert(1);
-
-    while(H.Count > 0) 
-      Console.WriteLine(H.Remove());
-  }
-}
-#+END_SRC
-
-#+BEGIN_SRC sh
-mcs demo/testcompare.cs src/heap.cs
-mono demo/testcompare.exe
-#+END_SRC
-
-#+RESULTS:
-: 7
-: 6
-: 5
-: 4
-: 3
-: 2
-: 1
-
-** Heap Sort Performance 
-
-Sort a Million numbers
-
-#+BEGIN_SRC csharp
-using System; 
-using System.Linq; 
-using System.Collections.Generic; 
-using System.Diagnostics; 
-
-public class Heapsort {
-
-  public static void Main() {
-
-    int n = 1000000;
-    var random = new Random();
-    Console.WriteLine("Generating {0} random elements...", n); 
-    var numbers = Enumerable.Range(0,n).Select(x => random.Next());
-
-    var H = new Heap<int>();
-    Console.WriteLine("Sorting {0} random elements...", n); 
-    var sw = Stopwatch.StartNew(); 
-    foreach(var i in numbers) 
-      H.Insert(i); 
-    var elapsedInsert = sw.ElapsedMilliseconds;
-    while(H.Count > 0) 
-      H.Remove();
-    var elapsedRemove = sw.ElapsedMilliseconds;
-    sw.Stop(); 
-    Console.WriteLine("Insertion: {0} Removal: {1} Combined: {2}", elapsedInsert, elapsedRemove, elapsedInsert + elapsedRemove); 
-  }
-}
-#+END_SRC
-
-#+BEGIN_SRC sh
-mcs demo/heapsort.cs src/heap.cs 
-mono demo/heapsort.exe
-#+END_SRC
-
-#+RESULTS:
-: Generating 1000000 random elements...
-: Sorting 1000000 random elements...
-: Insertion: 126 Removal: 833 Combined: 959
-
-Note:  Insertion is very fast, Removal is comparably slow. 
-
-Both operations run in O(log n) time, but Insertion is way more fast. Tests show that in practice Up Bubbling rarely exceeds a few levels, while Down Bubbling almost /always/ needs to process the whole tree height. 
+Note:  Removal of the last element in a =List<T>= is O(1) (see http://referencesource.microsoft.com/#mscorlib/system/collections/generic/list.cs,cf7f4095e4de7646), O(n) otherwise. 
 
 
-* Graphviz Output 
 
-** Extensions
+* Graphviz Extension 
 
-#+BEGIN_SRC csharp
+#+BEGIN_SRC csharp :tangle src/heapextensions.cs
 using System;
 
 public static class HeapExtensions {
@@ -250,11 +140,133 @@ public static class HeapExtensions {
 }
 #+END_SRC
 
-** Example 
+* Demo 
+
+** Simple Tests
+
+#+BEGIN_SRC csharp :tangle demo/test.cs
+using System; 
+using System.Linq; 
+using System.Collections.Generic; 
+
+public class Test {
+
+  public static void Main() {
+
+    var H = new Heap<int>();
+    H.Insert(7);
+    H.Insert(4);
+    H.Insert(6);
+    H.Insert(3);
+    H.Insert(2);
+    H.Insert(5);
+    H.Insert(1);
+    H.Insert(8);
+
+    while(H.Count > 0) 
+      Console.Write(H.Remove() + " ");
+
+    var L = Enumerable.Range(1,8); 
+    Console.WriteLine();
+    H = Heap<int>.FromList(L.ToList()); 
+
+    while(H.Count > 0) 
+      Console.Write(H.Remove() + " ");
+
+  }
+}
+#+END_SRC
+
+#+BEGIN_SRC sh :results verbatim :exports both 
+mcs demo/test.cs src/heap.cs
+mono demo/test.exe
+#+END_SRC
+
+#+RESULTS:
+: 1 2 3 4 5 6 7 8 
+: 1 2 3 4 5 6 7 8 
+
+** Reverse Order 
+
+#+BEGIN_SRC csharp :tangle demo/testcompare.cs
+using System; 
+
+public class TestCompare {
+
+  public static void Main() {
+
+    var H = new Heap<int>((x,y) => y - x);
+    H.Insert(7);
+    H.Insert(4);
+    H.Insert(6);
+    H.Insert(3);
+    H.Insert(2);
+    H.Insert(5);
+    H.Insert(1);
+
+    while(H.Count > 0) 
+      Console.Write(H.Remove() + " ");
+  }
+}
+#+END_SRC
+
+#+BEGIN_SRC sh :results verbatim :exports both 
+mcs demo/testcompare.cs src/heap.cs
+mono demo/testcompare.exe
+#+END_SRC
+
+#+RESULTS:
+: 7 6 5 4 3 2 1 
+
+** Heap Sort Performance 
+
+Sort a Million numbers
+
+#+BEGIN_SRC csharp :tangle demo/heapsort.cs 
+using System; 
+using System.Linq; 
+using System.Collections.Generic; 
+using System.Diagnostics; 
+
+public class Heapsort {
+
+  public static void Main() {
+
+    int n = 1000000;
+    var random = new Random();
+    Console.WriteLine("Generating {0} random elements...", n); 
+    var numbers = Enumerable.Range(0,n).Select(x => random.Next());
+
+    Console.WriteLine("Sorting {0} random elements...", n); 
+    var sw = Stopwatch.StartNew(); 
+    var H = Heap<int>.FromList(numbers.ToList());
+    
+    var elapsedInsert = sw.ElapsedMilliseconds;
+    while(H.Count > 0) 
+      H.Remove();
+    var elapsedRemove = sw.ElapsedMilliseconds;
+    sw.Stop(); 
+    Console.WriteLine("Insertion: {0} Removal: {1} Combined: {2}", elapsedInsert, elapsedRemove, elapsedInsert + elapsedRemove); 
+  }
+}
+#+END_SRC
+
+#+BEGIN_SRC sh :results verbatim :exports both
+mcs demo/heapsort.cs src/heap.cs 
+mono demo/heapsort.exe
+#+END_SRC
+
+#+RESULTS:
+: Generating 1000000 random elements...
+: Sorting 1000000 random elements...
+: Insertion: 71 Removal: 737 Combined: 808
+
+
+** Draw as Tree 
 
 Call extension method ~PrintDot~ and feed the results into [[http://www.graphviz.org/][Graphviz]]: 
 
-#+BEGIN_SRC csharp
+#+BEGIN_SRC csharp :tangle demo/heaptree.cs 
 class HeapTree {
   public static void Main() {
     var H = new Heap<int>();
@@ -266,17 +278,35 @@ class HeapTree {
     H.Insert(1);
     H.Insert(3);
     H.Insert(4);
-
     H.PrintDot(); 
   }
 }
 #+END_SRC
 
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :results verbatim :wrap "SRC dot :file images/heap.png" :exports both
 mcs demo/heaptree.cs src/heap.cs src/heapextensions.cs 
 mono demo/heaptree.exe
 #+END_SRC
 
+
+#+RESULTS:
+#+BEGIN_SRC dot :file images/heap.png
+digraph G {
+  "1" -> "4"
+  "4" -> "5"
+  "5" -> "8"
+  "8" [shape=rectangle];
+  empty0 [label="", style=invis];
+  "5" -> empty0
+  "4" -> "7"
+  "7" [shape=rectangle];
+  "1" -> "2"
+  "2" -> "6"
+  "6" [shape=rectangle];
+  "2" -> "3"
+  "3" [shape=rectangle];
+}
+#+END_SRC
 
 #+RESULTS:
 [[file:images/heap.png]]
@@ -285,7 +315,7 @@ mono demo/heaptree.exe
 
 ** Helper Classes
 
-#+BEGIN_SRC csharp
+#+BEGIN_SRC csharp :tangle demo/scheduler.cs 
 using System;
 using System.Collections.Generic; 
 
@@ -367,7 +397,7 @@ public class TaskScheduler {
 
 ** Example 
 
-#+BEGIN_SRC csharp
+#+BEGIN_SRC csharp :tangle demo/taskschedule.cs
 using System;
 using System.Collections.Generic; 
 
@@ -394,7 +424,7 @@ class TaskSchedule {
 
 #+END_SRC
 
-#+BEGIN_SRC sh
+#+BEGIN_SRC sh :results verbatim :wrap "SRC latex :imagemagick yes :iminoptions -density 600 :imoutoptions -geometry 400 :results raw :yexports results :fit yes :noweb yes :file images/schedule.png  :headers '(\"\\\\usepackage{tikz}\")" :exports both
 mcs demo/taskschedule.cs demo/scheduler.cs src/heap.cs
 mono demo/taskschedule.exe
 #+END_SRC
@@ -468,23 +498,23 @@ mono demo/taskschedule2.exe
 #+RESULTS:
 #+BEGIN_SRC latex :imagemagick yes :iminoptions -density 600 :imoutoptions -geometry 400 :results raw :yexports results :fit yes :noweb yes :file images/schedule2.png  :headers '("\\usepackage{tikz}")
 \begin{tikzpicture}[>=latex]
-  \draw[fill=blue!40](1,1.1) rectangle (5,1.8);
-  \draw[fill=blue!40](5,1.1) rectangle (8,1.8);
-  \draw[fill=blue!40](8,1.1) rectangle (10,1.8);
-  \draw[fill=blue!40](10,1.1) rectangle (13,1.8);
-  \draw[fill=blue!40](3,2.1) rectangle (8,2.8);
-  \draw[fill=blue!40](8,2.1) rectangle (14,2.8);
-  \draw[fill=blue!40](4,3.1) rectangle (6,3.8);
-  \draw[fill=blue!40](6,3.1) rectangle (13,3.8);
-  \draw[fill=blue!40](4,4.1) rectangle (12,4.8);
-  \draw[fill=blue!40](4,5.1) rectangle (10,5.8);
-  \draw[fill=blue!40](5,6.1) rectangle (11,6.8);
-  \draw[fill=blue!40](7,7.1) rectangle (12,7.8);
-  \draw[fill=blue!40](7,8.1) rectangle (15,8.8);
-  \draw[fill=blue!40](9,9.1) rectangle (15,9.8);
-  \draw[fill=blue!40](9,10.1) rectangle (10,10.8);
-  \draw[fill=blue!40](9,11.1) rectangle (16,11.8);
-  \draw[thick,->](-0.2,0.8) -- ++(0,12);
+  \draw[fill=blue!40](1,1.1) rectangle (3,1.8);
+  \draw[fill=blue!40](4,1.1) rectangle (5,1.8);
+  \draw[fill=blue!40](5,1.1) rectangle (10,1.8);
+  \draw[fill=blue!40](10,1.1) rectangle (14,1.8);
+  \draw[fill=blue!40](1,2.1) rectangle (6,2.8);
+  \draw[fill=blue!40](6,2.1) rectangle (10,2.8);
+  \draw[fill=blue!40](2,3.1) rectangle (6,3.8);
+  \draw[fill=blue!40](7,3.1) rectangle (12,3.8);
+  \draw[fill=blue!40](2,4.1) rectangle (8,4.8);
+  \draw[fill=blue!40](9,4.1) rectangle (14,4.8);
+  \draw[fill=blue!40](2,5.1) rectangle (8,5.8);
+  \draw[fill=blue!40](4,6.1) rectangle (9,6.8);
+  \draw[fill=blue!40](5,7.1) rectangle (7,7.8);
+  \draw[fill=blue!40](7,7.1) rectangle (10,7.8);
+  \draw[fill=blue!40](5,8.1) rectangle (7,8.8);
+  \draw[fill=blue!40](5,9.1) rectangle (11,9.8);
+  \draw[thick,->](-0.2,0.8) -- ++(0,10);
     \draw(-0.4, 1.5) node[left]{Machine 1} -- ++ (0.4,0);
     \draw(-0.4, 2.5) node[left]{Machine 2} -- ++ (0.4,0);
     \draw(-0.4, 3.5) node[left]{Machine 3} -- ++ (0.4,0);
@@ -494,9 +524,7 @@ mono demo/taskschedule2.exe
     \draw(-0.4, 7.5) node[left]{Machine 7} -- ++ (0.4,0);
     \draw(-0.4, 8.5) node[left]{Machine 8} -- ++ (0.4,0);
     \draw(-0.4, 9.5) node[left]{Machine 9} -- ++ (0.4,0);
-    \draw(-0.4, 10.5) node[left]{Machine 10} -- ++ (0.4,0);
-    \draw(-0.4, 11.5) node[left]{Machine 11} -- ++ (0.4,0);
-  \draw[thick,->](-0.2,0.8) -- ++(17,0) node[right]{time};
+  \draw[thick,->](-0.2,0.8) -- ++(15,0) node[right]{time};
     \draw(1, 0.6) node[below]{1} -- ++ (0,0.4);
     \draw(2, 0.6) node[below]{2} -- ++ (0,0.4);
     \draw(3, 0.6) node[below]{3} -- ++ (0,0.4);
@@ -511,8 +539,6 @@ mono demo/taskschedule2.exe
     \draw(12, 0.6) node[below]{12} -- ++ (0,0.4);
     \draw(13, 0.6) node[below]{13} -- ++ (0,0.4);
     \draw(14, 0.6) node[below]{14} -- ++ (0,0.4);
-    \draw(15, 0.6) node[below]{15} -- ++ (0,0.4);
-    \draw(16, 0.6) node[below]{16} -- ++ (0,0.4);
 \end{tikzpicture}
 #+END_SRC
 

@@ -21,7 +21,6 @@ public static class HeapExtensions {
     } else {
       Console.WriteLine("  \"{0}\" [shape=rectangle];", heap.list[index]);
       return;
-//      PrintNode(heap.list[index], empties++);
     }
 
     int rightChild = Heap<T>.RightChildIndex(index); 
@@ -32,7 +31,7 @@ public static class HeapExtensions {
       PrintNode(heap.list[index], empties++);
     }
   }
-  
+
   public static void PrintDot<T>(this Heap<T> heap) {
     Console.WriteLine("digraph G {");
     int empties = 0;
