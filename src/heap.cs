@@ -4,15 +4,17 @@ using System.Collections.Generic;
 public class Heap<T> {
 
   public List<T> list;  
-  Func<T, T, int> compare; 
+  public delegate int CompareDelegate(T v1, T v2); 
+  CompareDelegate compare = Comparer<T>.Default.Compare;
 
-  public Heap(Func<T, T, int> compare) {
-    list = new List<T>();
+  public Heap(CompareDelegate compare) :this() {
     this.compare = compare; 
   }
 
-  public Heap() : this((x,y) => Comparer<T>.Default.Compare(x,y)) { }
-
+  public Heap() {
+   list = new List<T>();
+  }
+  
   public int Count {
     get { return list.Count; }
   }
@@ -37,7 +39,7 @@ public class Heap<T> {
     return value; 
   }
 
-  public static Heap<T> FromList(List<T> list, Func<T, T, int> compare) {
+  public static Heap<T> FromList(List<T> list, CompareDelegate compare) {
     Heap<T> H = new Heap<T>(compare); 
     if (list.Count == 0) return H; 
     H.list = list; 
@@ -47,7 +49,7 @@ public class Heap<T> {
   }
 
   public static Heap<T> FromList(List<T> list) {
-    return FromList(list, (x,y) => Comparer<T>.Default.Compare(x,y)); 
+    return FromList(list, Comparer<T>.Default.Compare); 
   }
 
   private void Heapify(int index) {
